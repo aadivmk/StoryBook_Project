@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile — StoryLand</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body class="profile-page">
+  <div class="bg-floats" aria-hidden="true">
+    <span class="float-emoji" style="--x:15%;--delay:0s">🌸</span>
+    <span class="float-emoji" style="--x:80%;--delay:1s">⭐</span>
+  </div>
+  <nav class="navbar">
+    <div class="nav-logo"><span class="logo-icon">📖</span><span class="logo-text">StoryLand</span></div>
+    <div class="nav-actions">
+      <a href="dashboard.html" class="btn btn-ghost">← Dashboard</a>
+      <div class="user-menu" id="userMenu">
+        <span class="user-avatar" id="userAvatar">👤</span>
+        <span class="user-name" id="userName"></span>
+        <div class="dropdown">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="#" onclick="logout()">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-container">
+    <div class="page-header">
+      <h1>👤 My Profile</h1>
+      <p style="color:var(--text-muted)">Manage your account details</p>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <div class="form-card">
+      <div class="form-card-title">Personal Information</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="name" class="form-input" placeholder="Your name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email (read-only)</label>
+          <input type="email" id="email" class="form-input" disabled style="opacity:0.5" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">👧 Child Profile</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Child's Name</label>
+          <input type="text" id="childName" class="form-input" placeholder="e.g. Arya" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Child's Age</label>
+          <input type="number" id="childAge" class="form-input" placeholder="e.g. 6" min="1" max="15" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Child's Avatar</label>
+        <div id="avatarPicker" style="display:flex;gap:0.5rem;flex-wrap:wrap">
+          <span class="avatar-opt" data-val="🧒">🧒</span>
+          <span class="avatar-opt" data-val="👧">👧</span>
+          <span class="avatar-opt" data-val="👦">👦</span>
+          <span class="avatar-opt" data-val="🧑">🧑</span>
+          <span class="avatar-opt" data-val="🦁">🦁</span>
+          <span class="avatar-opt" data-val="🐼">🐼</span>
+          <span class="avatar-opt" data-val="🦊">🦊</span>
+          <span class="avatar-opt" data-val="🐸">🐸</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-large" onclick="saveProfile()">Save Changes ✅</button>
+    &nbsp;
+    <a href="dashboard.html" class="btn btn-ghost btn-large">Cancel</a>
+  </div>
+
+  <style>
+    .avatar-opt {
+      font-size:1.8rem; cursor:pointer; padding:0.3rem;
+      border-radius:10px; border:2px solid transparent; transition:all 0.2s;
+    }
+    .avatar-opt:hover    { border-color:var(--primary); transform:scale(1.15); }
+    .avatar-opt.selected { border-color:var(--accent); background:rgba(255,217,61,0.15); }
+  </style>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sounds.js"></script>
+  <script>
+    if (!requireAuth()) throw new Error('Not auth');
+    const user = getUser();
+    let selectedAvatar = user.child?.avatar || '🧒';
+
+    function loadProfile() {
+      document.getElementById('name').value      = user.name  || '';
+      document.getElementById('email').value     = user.email || '';
+      document.getElementById('childName').value = user.child?.name || '';
+      document.getElementById('childAge').value  = user.child?.age  || '';
+
+      // Mark the current avatar as selected
+      document.querySelectorAll('.avatar-opt').forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.val === selectedAvatar);
+        opt.addEventListener('click', () => {
+          document.querySelectorAll('.avatar-opt').forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+          selectedAvatar = opt.dataset.val;
+        });
+      });
+    }
+
+    async function saveProfile() {
+      const name      = document.getElementById('name').value.trim();
+      const childName = document.getElementById('childName').value.trim();
+      const childAge  = document.getElementById('childAge').value;
+
+      if (!name) return showAlert('Name is required.', 'error');
+
+      const child = { name: childName, age: parseInt(childAge) || 0, avatar: selectedAvatar };
+
+      try {
+        // PUT /api/auth/profile/:id  — update name + child
+        const res = await API.put(`/auth/profile/${user.id}`, { name, child });
+        setUser(res.user);   // refresh localStorage with updated user
+        SoundEngine.play('success');
+        showAlert('Profile updated successfully! ✅', 'success');
+        checkAuth();
+      } catch (e) {
+        SoundEngine.play('error');
+        showAlert(e.message, 'error');
+      }
+    }
+
+    function showAlert(msg, type) {
+      const a = document.getElementById('alertBox');
+      a.className = `alert alert-${type}`;
+      a.textContent = msg;
+      a.style.display = 'block';
+      setTimeout(() => { a.style.display = 'none'; }, 4000);
+    }
+
+    checkAuth();
+    loadProfile();
+  </script>
+</body>
+</html>

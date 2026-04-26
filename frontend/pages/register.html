@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — StoryLand</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body class="auth-page">
+  <div class="bg-floats" aria-hidden="true">
+    <span class="float-emoji" style="--x:10%;--delay:0s">🌸</span>
+    <span class="float-emoji" style="--x:80%;--delay:1.2s">🦋</span>
+    <span class="float-emoji" style="--x:50%;--delay:0.6s">🌈</span>
+  </div>
+
+  <div class="auth-card animate-bounce-in" style="max-width:540px">
+    <div class="auth-header">
+      <a href="index.html" class="auth-logo">📖</a>
+      <h1 class="auth-title">Join StoryLand! ✨</h1>
+      <p class="auth-subtitle">Create your free account and unlock a world of stories</p>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Your Full Name *</label>
+        <input type="text" id="name" class="form-input" placeholder="Jane Smith" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address *</label>
+        <input type="email" id="email" class="form-input" placeholder="jane@example.com" required />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Password *</label>
+        <input type="password" id="password" class="form-input" placeholder="Min 6 characters" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password *</label>
+        <input type="password" id="confirmPassword" class="form-input" placeholder="Repeat password" required />
+      </div>
+    </div>
+
+    <!-- Optional child profile -->
+    <div style="border:1px solid var(--card-border);border-radius:12px;padding:1.2rem;margin-bottom:1.2rem;">
+      <div class="form-label" style="margin-bottom:1rem;font-size:0.95rem;color:var(--accent)">
+        👧 Add Child (Optional)
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Child's Name</label>
+          <input type="text" id="childName" class="form-input" placeholder="e.g. Arya" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Child's Age</label>
+          <input type="number" id="childAge" class="form-input" placeholder="e.g. 6" min="2" max="15" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Child's Avatar</label>
+        <div class="avatar-picker" id="avatarPicker">
+          <span class="avatar-opt selected" data-val="🧒">🧒</span>
+          <span class="avatar-opt" data-val="👧">👧</span>
+          <span class="avatar-opt" data-val="👦">👦</span>
+          <span class="avatar-opt" data-val="🧑">🧑</span>
+          <span class="avatar-opt" data-val="🦁">🦁</span>
+          <span class="avatar-opt" data-val="🐼">🐼</span>
+          <span class="avatar-opt" data-val="🦊">🦊</span>
+          <span class="avatar-opt" data-val="🐸">🐸</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full" onclick="handleRegister()">
+      Create My Account 🎉
+    </button>
+
+    <div class="auth-link">
+      Already have an account? <a href="login.html">Sign in here</a>
+    </div>
+    <div class="auth-link" style="margin-top:0.5rem">
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </div>
+
+  <style>
+    .avatar-picker { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .avatar-opt {
+      font-size:1.8rem; cursor:pointer; padding:0.3rem;
+      border-radius:10px; border:2px solid transparent; transition:all 0.2s;
+    }
+    .avatar-opt:hover  { border-color:var(--primary); transform:scale(1.15); }
+    .avatar-opt.selected { border-color:var(--accent); background:rgba(255,217,61,0.15); }
+  </style>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sounds.js"></script>
+  <script>
+    if (isLoggedIn()) window.location.href = 'dashboard.html';
+
+    let selectedAvatar = '🧒';
+    document.querySelectorAll('.avatar-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.avatar-opt').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        selectedAvatar = opt.dataset.val;
+        SoundEngine.play('hover');
+      });
+    });
+
+    async function handleRegister() {
+      const name        = document.getElementById('name').value.trim();
+      const email       = document.getElementById('email').value.trim();
+      const password    = document.getElementById('password').value;
+      const confirm     = document.getElementById('confirmPassword').value;
+      const childName   = document.getElementById('childName').value.trim();
+      const childAge    = document.getElementById('childAge').value;
+
+      if (!name || !email || !password) return showAlert('Please fill all required fields.', 'error');
+      if (password.length < 6)         return showAlert('Password must be at least 6 characters.', 'error');
+      if (password !== confirm)         return showAlert('Passwords do not match!', 'error');
+
+      const child = childName ? { name: childName, age: parseInt(childAge) || 6, avatar: selectedAvatar } : {};
+
+      const btn = document.querySelector('button');
+      btn.textContent = 'Creating account...';
+      btn.disabled    = true;
+
+      try {
+        // POST /api/auth/register → { success, message, user }
+        const res = await API.post('/auth/register', { name, email, password, child });
+        setUser(res.user);   // save user object (no token)
+        SoundEngine.play('success');
+        showToast(res.message, 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 900);
+      } catch (err) {
+        SoundEngine.play('error');
+        showAlert(err.message, 'error');
+        btn.textContent = 'Create My Account 🎉';
+        btn.disabled    = false;
+      }
+    }
+
+    function showAlert(msg, type) {
+      const a = document.getElementById('alertBox');
+      a.className = `alert alert-${type}`;
+      a.textContent = msg;
+      a.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

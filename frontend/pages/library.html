@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Library — StoryLand</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body class="library-page">
+  <div class="bg-floats" aria-hidden="true">
+    <span class="float-emoji" style="--x:5%;--delay:0s">📚</span>
+    <span class="float-emoji" style="--x:88%;--delay:2s">✨</span>
+    <span class="float-emoji" style="--x:50%;--delay:1s">🌟</span>
+  </div>
+
+  <nav class="navbar">
+    <div class="nav-logo">
+      <span class="logo-icon">📖</span>
+      <span class="logo-text">StoryLand</span>
+    </div>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="library.html" class="nav-link active">Library</a>
+      <a href="about.html" class="nav-link">About</a>
+    </div>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost" id="loginBtn">Login</a>
+      <a href="register.html" class="btn btn-primary" id="registerBtn">Get Started ✨</a>
+      <div class="user-menu hidden" id="userMenu">
+        <span class="user-avatar" id="userAvatar">👤</span>
+        <span class="user-name" id="userName"></span>
+        <div class="dropdown">
+          <a href="dashboard.html">My Dashboard</a>
+          <a href="profile.html">Profile</a>
+          <a href="#" onclick="logout()">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="library-header">
+    <h1>📚 Story Library</h1>
+    <p>Explore magical tales perfect for your little reader</p>
+  </div>
+
+  <div class="library-container">
+    <!-- Filters -->
+    <div class="filters-bar">
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Search stories, themes, characters..." oninput="debounceFilter()" />
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Age:</span>
+        <select class="filter-select" id="filterAge" onchange="applyFilters()">
+          <option value="all">All Ages</option>
+          <option value="3-5">3–5 years</option>
+          <option value="4-7">4–7 years</option>
+          <option value="6-9">6–9 years</option>
+          <option value="7-10">7–10 years</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Level:</span>
+        <select class="filter-select" id="filterLevel" onchange="applyFilters()">
+          <option value="all">All Levels</option>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Genre:</span>
+        <select class="filter-select" id="filterGenre" onchange="applyFilters()">
+          <option value="all">All Genres</option>
+          <option value="fantasy">🧙 Fantasy</option>
+          <option value="adventure">🗺️ Adventure</option>
+          <option value="nature">🌿 Nature</option>
+          <option value="science">🔬 Science</option>
+          <option value="folklore">🏺 Folklore</option>
+          <option value="mystery">🔍 Mystery</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Sort:</span>
+        <select class="filter-select" id="filterSort" onchange="applyFilters()">
+          <option value="featured">⭐ Featured</option>
+          <option value="popular">👀 Most Viewed</option>
+          <option value="newest">🆕 Newest</option>
+          <option value="liked">❤️ Most Liked</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost" onclick="clearFilters()" style="padding:0.5rem 1rem;font-size:0.85rem">Clear ✕</button>
+    </div>
+
+    <div id="storiesCount" class="stories-count" style="margin-bottom:1rem"></div>
+    <div class="stories-grid" id="storiesGrid">
+      <div class="story-card-skeleton"></div>
+      <div class="story-card-skeleton"></div>
+      <div class="story-card-skeleton"></div>
+      <div class="story-card-skeleton"></div>
+      <div class="story-card-skeleton"></div>
+      <div class="story-card-skeleton"></div>
+    </div>
+  </div>
+
+
+  
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sounds.js"></script>
+  <script>
+    let debounceTimer;
+    function debounceFilter() { clearTimeout(debounceTimer); debounceTimer = setTimeout(applyFilters, 400); }
+
+    // Read URL params
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('age')) document.getElementById('filterAge').value = params.get('age');
+
+    async function applyFilters() {
+      SoundEngine.play('click');
+      const search = document.getElementById('searchInput').value.trim();
+      const age = document.getElementById('filterAge').value;
+      const level = document.getElementById('filterLevel').value;
+      const genre = document.getElementById('filterGenre').value;
+
+      let query = `/stories?`;
+      if (age !== 'all') query += `ageGroup=${age}&`;
+      if (level !== 'all') query += `readingLevel=${level}&`;
+      if (genre !== 'all') query += `genre=${genre}&`;
+      if (search) query += `search=${encodeURIComponent(search)}&`;
+
+      const grid = document.getElementById('storiesGrid');
+      grid.innerHTML = '<div class="story-card-skeleton"></div>'.repeat(6);
+
+      try {
+        const res = await API.get(query);
+        renderStories(res.stories, res.total);
+      } catch (e) {
+        grid.innerHTML = `<div class="no-stories">⚠️ Could not load stories. Make sure the backend is running!<br><small>Run: cd backend && node server.js</small></div>`;
+      }
+    }
+
+    function renderStories(stories, total) {
+      const grid = document.getElementById('storiesGrid');
+      document.getElementById('storiesCount').textContent = `${total || stories.length} stories found`;
+
+      if (!stories || stories.length === 0) {
+        grid.innerHTML = `<div class="no-stories">🔍 No stories found. Try different filters!</div>`;
+        return;
+      }
+
+      grid.innerHTML = stories.map((s, i) => `
+        <div class="story-card animate-card" onclick="openStory('${s._id}')" style="animation-delay:${i*0.07}s">
+          <div class="story-cover" style="background:${s.coverColor}18; border-color:${s.coverColor}30">
+            <span class="story-emoji">${s.coverEmoji}</span>
+            ${s.isFeatured ? `<div class="story-badge">⭐ Featured</div>` : ''}
+          </div>
+          <div class="story-info">
+            <h3 class="story-title">${s.title}</h3>
+            <p class="story-desc">${s.description.substring(0,90)}...</p>
+            <div class="story-meta">
+              <span class="meta-tag age-tag">🎂 ${s.ageGroup} yrs</span>
+              <span class="meta-tag level-tag">📖 ${s.readingLevel}</span>
+              <span class="meta-tag genre-tag">🎭 ${s.genre}</span>
+            </div>
+            <div class="story-stats">
+              <span>👀 ${s.views}</span>
+              <span>❤️ ${s.likes}</span>
+              <span>⏱️ ${s.duration} min</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openStory(id) {
+      SoundEngine.play('storyOpen');
+      window.location.href = `reader.html?id=${id}`;
+    }
+
+    function clearFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterAge').value = 'all';
+      document.getElementById('filterLevel').value = 'all';
+      document.getElementById('filterGenre').value = 'all';
+      applyFilters();
+    }
+
+    checkAuth();
+    applyFilters();
+  </script>
+</body>
+</html>

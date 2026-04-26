@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — StoryLand</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body class="auth-page">
+  <div class="bg-floats" aria-hidden="true">
+    <span class="float-emoji" style="--x:15%;--delay:0s">🌙</span>
+    <span class="float-emoji" style="--x:75%;--delay:1s">⭐</span>
+    <span class="float-emoji" style="--x:45%;--delay:2s">✨</span>
+  </div>
+
+  <div class="auth-card animate-bounce-in">
+    <div class="auth-header">
+      <a href="index.html" class="auth-logo">📖</a>
+      <h1 class="auth-title">Welcome Back!</h1>
+      <p class="auth-subtitle">Sign in to continue your reading adventure 📚</p>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" id="email" class="form-input" placeholder="parent@example.com" required />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" id="password" class="form-input" placeholder="Your password" required />
+    </div>
+
+    <button class="btn btn-primary btn-full" onclick="handleLogin()">
+      Sign In 🚀
+    </button>
+
+    <div class="auth-link">
+      Don't have an account? <a href="register.html">Create one free ✨</a>
+    </div>
+    <div class="auth-link" style="margin-top:0.5rem">
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sounds.js"></script>
+  <script>
+    if (isLoggedIn()) window.location.href = 'dashboard.html';
+
+    async function handleLogin() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        showAlert('Please fill in all fields.', 'error');
+        SoundEngine.play('error');
+        return;
+      }
+
+      const btn = document.querySelector('button');
+      btn.textContent = 'Signing in...';
+      btn.disabled    = true;
+
+      try {
+        // POST /api/auth/login → { success, message, user }
+        const res = await API.post('/auth/login', { email, password });
+        setUser(res.user);   // save user object (no token needed)
+        SoundEngine.play('welcome');
+        showToast(res.message, 'success');
+        setTimeout(() => {
+          const redirect = new URLSearchParams(window.location.search).get('redirect');
+          window.location.href = redirect || 'dashboard.html';
+        }, 800);
+      } catch (err) {
+        SoundEngine.play('error');
+        showAlert(err.message, 'error');
+        btn.textContent = 'Sign In 🚀';
+        btn.disabled    = false;
+      }
+    }
+
+    function showAlert(msg, type) {
+      const a = document.getElementById('alertBox');
+      a.className = `alert alert-${type}`;
+      a.textContent = msg;
+      a.style.display = 'block';
+    }
+
+    document.addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
+  </script>
+</body>
+</html>

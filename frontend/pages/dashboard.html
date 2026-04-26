@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — StoryLand</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body class="dashboard-page">
+  <div class="bg-floats" aria-hidden="true">
+    <span class="float-emoji" style="--x:8%;--delay:0s">📚</span>
+    <span class="float-emoji" style="--x:85%;--delay:1.5s">⭐</span>
+  </div>
+
+  <nav class="navbar">
+    <div class="nav-logo"><span class="logo-icon">📖</span><span class="logo-text">StoryLand</span></div>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="library.html" class="nav-link">Library</a>
+    </div>
+    <div class="nav-actions">
+      <div class="user-menu" id="userMenu">
+        <span class="user-avatar" id="userAvatar">👤</span>
+        <span class="user-name" id="userName"></span>
+        <div class="dropdown">
+          <a href="dashboard.html">My Dashboard</a>
+          <a href="profile.html">Profile</a>
+          <a href="#" onclick="logout()">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-header">
+    <h1 class="dashboard-welcome" id="welcomeMsg">Welcome back! 👋</h1>
+    <p class="dashboard-sub">Your reading adventure continues here</p>
+    <!-- Stats are shown from localStorage reading history -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-icon">📚</div><div class="stat-value" id="statTotal">0</div><div class="stat-key">Stories Visited</div></div>
+      <div class="stat-card"><div class="stat-icon">🌟</div><div class="stat-value" id="statFeatured">—</div><div class="stat-key">Featured Read</div></div>
+      <div class="stat-card"><div class="stat-icon">📖</div><div class="stat-value" id="statGenre">—</div><div class="stat-key">Fav Genre</div></div>
+      <div class="stat-card"><div class="stat-icon">🧒</div><div class="stat-value" id="statChild">—</div><div class="stat-key">Child Profile</div></div>
+    </div>
+  </div>
+
+  <div class="dashboard-container">
+    <h2 class="section-heading">🌟 Recommended Stories</h2>
+    <div class="stories-grid" id="recommendedGrid">
+      <div class="story-card-skeleton"></div>
+      <div class="story-card-skeleton"></div>
+      <div class="story-card-skeleton"></div>
+    </div>
+
+    <div style="margin-top:2.5rem;text-align:center">
+      <a href="library.html" class="btn btn-primary" style="display:inline-flex">
+        📚 Browse Full Library
+      </a>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sounds.js"></script>
+  <script>
+    // Protect this page — redirect to login if not logged in
+    if (!requireAuth()) throw new Error('Not authenticated');
+
+    const user = getUser();
+
+    async function loadDashboard() {
+      // Personalise greeting
+      document.getElementById('welcomeMsg').textContent =
+        `Welcome back, ${user.name.split(' ')[0]}! 👋`;
+
+      // Show child info
+      if (user.child && user.child.name) {
+        document.getElementById('statChild').textContent = user.child.avatar + ' ' + user.child.name;
+      }
+
+      // Update nav
+      checkAuth();
+
+      // Load featured/recommended stories from backend
+      try {
+        const res = await API.get('/stories?featured=true');
+        document.getElementById('statFeatured').textContent = res.stories.length;
+        document.getElementById('statGenre').textContent = '🧙 Fantasy';
+        document.getElementById('statTotal').textContent = res.total;
+
+        document.getElementById('recommendedGrid').innerHTML = res.stories.map(s => `
+          <div class="story-card animate-card" onclick="window.location.href='reader.html?id=${s._id}'" style="cursor:pointer">
+            <div class="story-cover" style="background:${s.coverColor}18">
+              <span class="story-emoji">${s.coverEmoji}</span>
+              ${s.isFeatured ? '<div class="story-badge">⭐ Featured</div>' : ''}
+            </div>
+            <div class="story-info">
+              <h3 class="story-title">${s.title}</h3>
+              <p class="story-desc">${s.description.substring(0,80)}...</p>
+              <div class="story-meta">
+                <span class="meta-tag age-tag">${s.ageGroup} yrs</span>
+                <span class="meta-tag level-tag">${s.readingLevel}</span>
+              </div>
+            </div>
+          </div>`).join('');
+      } catch(e) {
+        document.getElementById('recommendedGrid').innerHTML =
+          `<p style="color:var(--text-muted);padding:1rem">Could not load stories. Is the backend running?</p>`;
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

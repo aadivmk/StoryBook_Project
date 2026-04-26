@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StoryLand ✨ — Magical Stories for Children</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body class="landing-page">
+
+  <!-- Floating Background Elements -->
+  <div class="bg-floats" aria-hidden="true">
+    <span class="float-emoji" style="--x:10%;--delay:0s">⭐</span>
+    <span class="float-emoji" style="--x:25%;--delay:1.2s">🌙</span>
+    <span class="float-emoji" style="--x:45%;--delay:0.5s">✨</span>
+    <span class="float-emoji" style="--x:60%;--delay:2s">🌈</span>
+    <span class="float-emoji" style="--x:80%;--delay:0.8s">🦋</span>
+    <span class="float-emoji" style="--x:90%;--delay:1.8s">🌸</span>
+    <span class="float-emoji" style="--x:5%;--delay:3s">🎈</span>
+    <span class="float-emoji" style="--x:70%;--delay:2.5s">🌟</span>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-logo">
+      <span class="logo-icon">📖</span>
+      <span class="logo-text">StoryLand</span>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="library.html" class="nav-link">Library</a>
+      <a href="about.html" class="nav-link">About</a>
+    </div>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost" id="loginBtn">Login</a>
+      <a href="register.html" class="btn btn-primary" id="registerBtn">Get Started ✨</a>
+      <div class="user-menu hidden" id="userMenu">
+        <span class="user-avatar" id="userAvatar">👤</span>
+        <span class="user-name" id="userName"></span>
+        <div class="dropdown">
+          <a href="dashboard.html">My Dashboard</a>
+          <a href="profile.html">Profile</a>
+          <a href="#" onclick="logout()">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge animate-bounce-in">🌟 Magical Stories Await!</div>
+      <h1 class="hero-title animate-slide-up">
+        Where Every Child
+        <span class="title-highlight">Dreams Big</span>
+        <span class="title-wave">🌈</span>
+      </h1>
+      <p class="hero-subtitle animate-fade-in">
+        Explore hundreds of enchanting stories with beautiful animations, 
+        fun sound effects, and characters your child will love forever.
+      </p>
+      <div class="hero-buttons animate-fade-in">
+        <a href="register.html" class="btn btn-hero-primary">
+          Start Reading Free 📚
+        </a>
+        <a href="library.html" class="btn btn-hero-secondary">
+          Explore Library →
+        </a>
+      </div>
+      <div class="hero-stats animate-fade-in">
+        <div class="stat"><span class="stat-num">50+</span><span class="stat-label">Stories</span></div>
+        <div class="stat-divider">•</div>
+        <div class="stat"><span class="stat-num">3-10</span><span class="stat-label">Age Groups</span></div>
+        <div class="stat-divider">•</div>
+        <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Free Access</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="book-3d animate-float">
+        <div class="book-cover">
+          <span class="book-emoji">📖</span>
+          <div class="book-sparkles">
+            <span>✨</span><span>⭐</span><span>💫</span>
+          </div>
+        </div>
+        <div class="book-characters">
+          <div class="char char-1 animate-bounce">🦁</div>
+          <div class="char char-2 animate-float">🦋</div>
+          <div class="char char-3 animate-spin-slow">⭐</div>
+          <div class="char char-4 animate-bounce">🐉</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <h2 class="section-title">Why Kids Love StoryLand 💕</h2>
+    <div class="features-grid">
+      <div class="feature-card animate-card" style="--card-color:#FF6B9D">
+        <div class="feature-icon">🎬</div>
+        <h3>Animated Stories</h3>
+        <p>Every page comes alive with beautiful animations and moving characters that spark imagination.</p>
+      </div>
+      <div class="feature-card animate-card" style="--card-color:#4ECDC4">
+        <div class="feature-icon">🔊</div>
+        <h3>Fun Sound Effects</h3>
+        <p>Magical sound effects and music make reading a truly immersive adventure for little ears.</p>
+      </div>
+      <div class="feature-card animate-card" style="--card-color:#FFD93D">
+        <div class="feature-icon">📚</div>
+        <h3>Smart Filtering</h3>
+        <p>Find perfect stories by age group, reading level, or genre — tailored just for your child.</p>
+      </div>
+      
+    </div>
+  </section>
+
+  <!-- Featured Stories Preview -->
+  <section class="preview-section">
+    <h2 class="section-title">Featured Stories 🌟</h2>
+    <div class="stories-preview-grid" id="featuredStories">
+      <div class="story-card-skeleton"></div>
+      <div class="story-card-skeleton"></div>
+      <div class="story-card-skeleton"></div>
+    </div>
+    <div class="preview-cta">
+      <a href="library.html" class="btn btn-primary btn-large">See All Stories →</a>
+    </div>
+  </section>
+
+  <!-- Age Groups Section -->
+  <section class="age-section">
+    <h2 class="section-title">Stories For Every Age 🎈</h2>
+    <div class="age-grid">
+      <div class="age-card" onclick="goToLibrary('3-5')">
+        <div class="age-emoji">🐣</div>
+        <div class="age-range">Ages 3–5</div>
+        <div class="age-label">Little Readers</div>
+        <div class="age-desc">Simple words, big pictures, magical characters</div>
+      </div>
+      <div class="age-card" onclick="goToLibrary('4-7')">
+        <div class="age-emoji">🌱</div>
+        <div class="age-range">Ages 4–7</div>
+        <div class="age-label">Early Explorers</div>
+        <div class="age-desc">Short stories with adventure and fun</div>
+      </div>
+      <div class="age-card" onclick="goToLibrary('6-9')">
+        <div class="age-emoji">🌟</div>
+        <div class="age-range">Ages 6–9</div>
+        <div class="age-label">Story Adventurers</div>
+        <div class="age-desc">Richer stories with deeper lessons</div>
+      </div>
+      <div class="age-card" onclick="goToLibrary('7-10')">
+        <div class="age-emoji">🚀</div>
+        <div class="age-range">Ages 7–10</div>
+        <div class="age-label">Big Readers</div>
+        <div class="age-desc">Epic adventures and exciting missions</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="cta-section">
+    <div class="cta-content">
+      <div class="cta-emoji animate-bounce">🎉</div>
+      <h2>Ready to Start the Adventure?</h2>
+      <p>Join thousands of families already reading on StoryLand. It's completely free!</p>
+      <a href="register.html" class="btn btn-cta">Create Free Account ✨</a>
+    </div>
+    <div class="cta-floats" aria-hidden="true">
+      <span>⭐</span><span>🌙</span><span>✨</span><span>🌈</span><span>🦋</span>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-logo">📖 StoryLand</div>
+    <p class="footer-tagline">Magical stories for curious minds 🌟</p>
+    <div class="footer-links">
+      <a href="about.html">About</a>
+      <a href="library.html">Library</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+    </div>
+    <p class="footer-copy">© 2024 StoryLand — A College Project 📚</p>
+  </footer>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sounds.js"></script>
+  <script>
+    // Load featured stories
+    async function loadFeaturedStories() {
+      try {
+        const res = await API.get('/stories?featured=true&limit=3');
+        const grid = document.getElementById('featuredStories');
+        if (res.stories && res.stories.length > 0) {
+          grid.innerHTML = res.stories.map(story => `
+            <div class="story-card animate-card" onclick="openStory('${story._id}')">
+              <div class="story-cover" style="background:${story.coverColor}20; border-color:${story.coverColor}40">
+                <span class="story-emoji">${story.coverEmoji}</span>
+                <div class="story-badge ${story.isFeatured ? 'featured' : ''}">${story.isFeatured ? '⭐ Featured' : ''}</div>
+              </div>
+              <div class="story-info">
+                <h3 class="story-title">${story.title}</h3>
+                <p class="story-desc">${story.description.substring(0,80)}...</p>
+                <div class="story-meta">
+                  <span class="meta-tag age-tag">${story.ageGroup} yrs</span>
+                  <span class="meta-tag level-tag">${story.readingLevel}</span>
+                  <span class="meta-tag genre-tag">${story.genre}</span>
+                </div>
+                <div class="story-stats">
+                  <span>👀 ${story.views}</span>
+                  <span>❤️ ${story.likes}</span>
+                  <span>⏱️ ${story.duration} min</span>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          grid.innerHTML = '<p class="no-stories">Connect to backend to see stories! 📚</p>';
+        }
+      } catch (e) {
+        document.getElementById('featuredStories').innerHTML = `
+          <div class="story-card demo-card">
+            <div class="story-cover" style="background:#FFD70020">
+              <span class="story-emoji">⭐</span>
+            </div>
+            <div class="story-info">
+              <h3>The Brave Little Star</h3>
+              <p>A tiny star learns that courage comes from within...</p>
+              <div class="story-meta"><span class="meta-tag">3-5 yrs</span><span class="meta-tag">Beginner</span></div>
+            </div>
+          </div>
+          <div class="story-card demo-card">
+            <div class="story-cover" style="background:#FF6B3520">
+              <span class="story-emoji">🐉</span>
+            </div>
+            <div class="story-info">
+              <h3>Dragon Who Loved Cookies</h3>
+              <p>A fire-breathing dragon discovers the magic of sharing...</p>
+              <div class="story-meta"><span class="meta-tag">4-7 yrs</span><span class="meta-tag">Beginner</span></div>
+            </div>
+          </div>
+          <div class="story-card demo-card">
+            <div class="story-cover" style="background:#7B2FBE20">
+              <span class="story-emoji">✏️</span>
+            </div>
+            <div class="story-info">
+              <h3>The Magic Pencil</h3>
+              <p>A young girl discovers a pencil that brings drawings to life...</p>
+              <div class="story-meta"><span class="meta-tag">6-9 yrs</span><span class="meta-tag">Intermediate</span></div>
+            </div>
+          </div>`;
+      }
+    }
+
+    function openStory(id) {
+      window.location.href = `reader.html?id=${id}`;
+    }
+
+    function goToLibrary(age) {
+      window.location.href = `library.html?age=${age}`;
+    }
+
+    loadFeaturedStories();
+    checkAuth();
+  </script>
+</body>
+</html>

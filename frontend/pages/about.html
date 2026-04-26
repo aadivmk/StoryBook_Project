@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — StoryLand</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="bg-floats" aria-hidden="true">
+    <span class="float-emoji" style="--x:10%;--delay:0s">🌟</span>
+    <span class="float-emoji" style="--x:85%;--delay:1s">🦋</span>
+    <span class="float-emoji" style="--x:50%;--delay:2s">✨</span>
+  </div>
+  <nav class="navbar">
+    <div class="nav-logo"><span class="logo-icon">📖</span><span class="logo-text">StoryLand</span></div>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="library.html" class="nav-link">Library</a>
+      <a href="about.html" class="nav-link active">About</a>
+    </div>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-ghost" id="loginBtn">Login</a>
+      <a href="register.html" class="btn btn-primary" id="registerBtn">Get Started ✨</a>
+      <div class="user-menu hidden" id="userMenu">
+        <span class="user-avatar" id="userAvatar">👤</span>
+        <span class="user-name" id="userName"></span>
+        <div class="dropdown">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="#" onclick="logout()">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="about-section">
+    <div class="animate-slide-up">
+      <div style="font-size:4rem;margin-bottom:1rem">📖</div>
+      <h1>About StoryLand</h1>
+      <p>StoryLand is an interactive children's storybook platform built as a college project, designed to make reading magical, fun, and accessible for every child. We believe every child deserves a world of stories that sparks their imagination.</p>
+
+      <p>Our platform features beautifully animated stories with sound effects, smart age-based filtering, and progress tracking for parents — all built with pure HTML, CSS, JavaScript, Node.js, and MongoDB.</p>
+    </div>
+
+    <div style="background:var(--card-bg);border:1px solid var(--card-border);border-radius:20px;padding:2rem;margin:2rem 0">
+      <h2 style="font-family:var(--font-display);color:var(--accent);margin-bottom:1.5rem">🛠️ Tech Stack</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem">
+        <div style="text-align:center;padding:1.2rem;background:rgba(255,107,157,0.08);border-radius:12px">
+          <div style="font-size:2.5rem">🌐</div>
+          <div style="font-weight:800;margin-top:0.5rem">HTML5</div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">Structure & Semantics</div>
+        </div>
+        <div style="text-align:center;padding:1.2rem;background:rgba(78,205,196,0.08);border-radius:12px">
+          <div style="font-size:2.5rem">🎨</div>
+          <div style="font-weight:800;margin-top:0.5rem">CSS3</div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">Animations & Styling</div>
+        </div>
+        <div style="text-align:center;padding:1.2rem;background:rgba(255,217,61,0.08);border-radius:12px">
+          <div style="font-size:2.5rem">⚡</div>
+          <div style="font-weight:800;margin-top:0.5rem">JavaScript</div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">Frontend Logic</div>
+        </div>
+        <div style="text-align:center;padding:1.2rem;background:rgba(107,203,119,0.08);border-radius:12px">
+          <div style="font-size:2.5rem">🟢</div>
+          <div style="font-weight:800;margin-top:0.5rem">Node.js</div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">Backend Server</div>
+        </div>
+        <div style="text-align:center;padding:1.2rem;background:rgba(123,47,190,0.08);border-radius:12px">
+          <div style="font-size:2.5rem">🍃</div>
+          <div style="font-weight:800;margin-top:0.5rem">MongoDB</div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">Database</div>
+        </div>
+        <div style="text-align:center;padding:1.2rem;background:rgba(255,107,157,0.08);border-radius:12px">
+          <div style="font-size:2.5rem">🚂</div>
+          <div style="font-weight:800;margin-top:0.5rem">Express.js</div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">REST API</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 style="font-family:var(--font-display);font-size:1.8rem;margin-bottom:0.5rem">✨ Key Features</h2>
+    <ul style="list-style:none;padding:0;color:var(--text-muted);line-height:2">
+      <li>🔐 Parent Registration & JWT Authentication</li>
+      <li>📚 Story Library with Age, Genre & Level Filters</li>
+      <li>🎬 Animated Story Reader with Character Animations</li>
+      <li>🔊 Web Audio API Sound Effects (no external files!)</li>
+      <li>🎉 Confetti & Celebration on Story Completion</li>
+      <li>📊 Reading Progress Tracking per User</li>
+      <li>🛡️ Admin Panel for Story & User Management</li>
+      <li>📱 Fully Responsive Design</li>
+    </ul>
+
+    <div style="text-align:center;margin-top:3rem;padding:2rem;background:linear-gradient(135deg,rgba(255,107,157,0.1),rgba(78,205,196,0.1));border-radius:20px;border:1px solid var(--card-border)">
+      <div style="font-size:3rem;margin-bottom:1rem">🎓</div>
+      <h2 style="font-family:var(--font-display);font-size:1.8rem;margin-bottom:0.5rem">College Project</h2>
+      <p style="color:var(--text-muted)">Built with ❤️ using HTML, CSS, JavaScript, Node.js & MongoDB</p>
+      <div style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <a href="library.html" class="btn btn-primary">Explore Library 📚</a>
+        <a href="register.html" class="btn btn-secondary">Get Started ✨</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-logo">📖 StoryLand</div>
+    <p class="footer-tagline">Magical stories for curious minds 🌟</p>
+    <p class="footer-copy">© 2024 StoryLand — A College Project 📚</p>
+  </footer>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>checkAuth();</script>
+</body>
+</html>

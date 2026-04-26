@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reading — StoryLand</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/animations.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    .reader-page { background: var(--dark); }
+    .reader-back { background:none; border:1px solid var(--card-border); color:var(--text-light); padding:0.45rem 1rem; border-radius:50px; cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:0.85rem; transition:all 0.2s; }
+    .reader-back:hover { border-color:var(--primary); color:var(--primary); }
+    .nav-btn {
+      background: var(--card-bg); border: 1.5px solid var(--card-border);
+      color: var(--text-light); padding: 0.8rem 1.8rem;
+      border-radius: 50px; cursor: pointer; font-family: var(--font-body);
+      font-weight: 800; font-size: 1rem; transition: all 0.3s; display:flex; align-items:center; gap:0.5rem;
+    }
+    .nav-btn:hover:not(:disabled) { border-color:var(--primary); color:var(--primary); transform:scale(1.05); }
+    .nav-btn:disabled { opacity:0.3; cursor:not-allowed; }
+    .nav-btn.next { background:var(--primary); border-color:var(--primary); color:white; }
+    .nav-btn.next:hover:not(:disabled) { background:#e85d8e; transform:scale(1.05); }
+    .like-btn { background:none; border:1.5px solid var(--card-border); color:var(--text-light); padding:0.5rem 1rem; border-radius:50px; cursor:pointer; font-family:var(--font-body); font-weight:700; font-size:0.9rem; transition:all 0.2s; }
+    .like-btn:hover { border-color:#e74c3c; color:#e74c3c; }
+    .like-btn.liked { background:rgba(231,76,60,0.15); border-color:#e74c3c; color:#e74c3c; }
+    .story-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; gap:1rem; }
+    .stars-rain { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:998; }
+    .star-drop { position:absolute; top:-50px; font-size:1.5rem; animation:starDrop linear forwards; }
+    @keyframes starDrop { to { transform:translateY(110vh) rotate(360deg); opacity:0; } }
+    /* Animated video panel */
+    .animated-video-panel {
+      background: linear-gradient(135deg, #0f3460, #16213e);
+      border-radius: 20px 20px 0 0; padding: 2rem;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 320px; position: relative; overflow: hidden;
+    }
+    .video-bg-gradient {
+      position: absolute; inset: 0;
+      background: linear-gradient(270deg, #1a1a2e, #0f3460, #16213e);
+      background-size: 300% 300%;
+      animation: videoBgAnim 6s ease infinite;
+    }
+    @keyframes videoBgAnim {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .video-particles { position: absolute; inset: 0; overflow: hidden; }
+    .video-particle {
+      position: absolute; border-radius: 50%;
+      animation: particleFloat linear infinite;
+      opacity: 0.3;
+    }
+    @keyframes particleFloat {
+      0% { transform: translateY(100%) scale(0); opacity: 0; }
+      20% { opacity: 0.4; }
+      80% { opacity: 0.2; }
+      100% { transform: translateY(-20px) scale(1.5); opacity: 0; }
+    }
+    .video-characters {
+      position: relative; z-index: 2;
+      display: flex; align-items: flex-end; justify-content: center;
+      gap: 2rem; width: 100%;
+    }
+    .video-char {
+      font-size: 5rem;
+      filter: drop-shadow(0 0 20px rgba(255,107,157,0.6));
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .video-char.active { transform: scale(1.3) translateY(-10px); filter: drop-shadow(0 0 30px rgba(255,217,61,0.8)); }
+    .video-bg-emoji {
+      position: absolute; font-size: 8rem; opacity: 0.08;
+      animation: bgEmojiPulse 4s ease-in-out infinite;
+      z-index: 1;
+    }
+    @keyframes bgEmojiPulse { 0%,100%{transform:scale(1) rotate(-5deg);} 50%{transform:scale(1.1) rotate(5deg);} }
+    .page-text-fancy {
+      font-size: 1.3rem; line-height: 2; font-weight: 700;
+      text-align: center; color: var(--text-light);
+      position: relative;
+    }
+    .word-highlight { display: inline-block; transition: all 0.3s; cursor: default; }
+    .word-highlight:hover { color: var(--accent); transform: scale(1.1); }
+  </style>
+</head>
+<body class="reader-page">
+  <div class="confetti-container" id="confettiContainer"></div>
+  <div class="stars-rain" id="starsRain"></div>
+
+  <!-- Reader Header -->
+  <div class="reader-header">
+    <button class="reader-back" onclick="goBack()">← Library</button>
+    <div class="reader-title" id="readerTitle">Loading story...</div>
+    <div class="reader-controls">
+      <div class="progress-bar-container">
+        <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="progress-label" id="progressLabel">Page 1 of ?</div>
+      </div>
+      <button class="sound-toggle" id="soundToggle" onclick="toggleSound()">🔊 Sound ON</button>
+      <button class="like-btn" id="likeBtn" onclick="toggleLike()">❤️ Like</button>
+    </div>
+  </div>
+
+  <!-- Main Story Area -->
+  <div class="story-container" id="storyContainer">
+    <div class="story-loading">
+      <div style="font-size:4rem;" class="animate-bounce">📖</div>
+      <div class="wave-dots"><span></span><span></span><span></span></div>
+      <p style="color:var(--text-muted)">Opening your story...</p>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="reader-nav" id="readerNav" style="display:none">
+    <button class="nav-btn prev" id="prevBtn" onclick="changePage(-1)" disabled>← Previous</button>
+    <div class="page-dots" id="pageDots"></div>
+    <button class="nav-btn next" id="nextBtn" onclick="changePage(1)">Next →</button>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sounds.js"></script>
+  <script>
+    let story = null, currentPage = 0, startTime = Date.now(), soundEnabled = true, liked = false;
+
+    const storyId = new URLSearchParams(window.location.search).get('id');
+    if (!storyId) window.location.href = 'library.html';
+
+    async function loadStory() {
+      try {
+        const res = await API.get(`/stories/${storyId}`);
+        story = res.story;
+        document.title = `${story.title} — StoryLand`;
+        document.getElementById('readerTitle').textContent = story.title;
+
+        // Reading always starts from page 1 (progress tracking removed for simplicity)
+
+        SoundEngine.play('storyOpen');
+        AmbientMusic.start();
+        buildDots();
+        renderPage();
+        document.getElementById('readerNav').style.display = 'flex';
+      } catch (e) {
+        document.getElementById('storyContainer').innerHTML = `
+          <div style="text-align:center;padding:3rem">
+            <div style="font-size:4rem">😔</div>
+            <h2 style="margin:1rem 0">Could not load story</h2>
+            <p style="color:var(--text-muted)">Make sure the backend is running</p>
+            <a href="library.html" class="btn btn-primary" style="margin-top:1.5rem;display:inline-flex">← Back to Library</a>
+          </div>`;
+      }
+    }
+
+    function buildDots() {
+      const dots = document.getElementById('pageDots');
+      dots.innerHTML = story.pages.map((_, i) => `<div class="page-dot ${i === 0 ? 'active' : ''}" onclick="goToPage(${i})"></div>`).join('');
+    }
+
+    function renderPage(direction = 'next') {
+      const page = story.pages[currentPage];
+      const total = story.pages.length;
+      const pct = ((currentPage + 1) / total) * 100;
+
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressLabel').textContent = `Page ${currentPage + 1} of ${total}`;
+
+      // Update dots
+      document.querySelectorAll('.page-dot').forEach((d, i) => d.classList.toggle('active', i === currentPage));
+      document.getElementById('prevBtn').disabled = currentPage === 0;
+      document.getElementById('nextBtn').textContent = currentPage === total - 1 ? '🎉 Finish' : 'Next →';
+
+      // Generate particles
+      const particleColors = ['#FF6B9D', '#4ECDC4', '#FFD93D', '#7B2FBE', '#6BCB77'];
+      const particlesHTML = Array.from({length: 12}, (_, i) => {
+        const size = 4 + Math.random() * 8;
+        const color = particleColors[Math.floor(Math.random() * particleColors.length)];
+        const left = 5 + Math.random() * 90;
+        const dur = 3 + Math.random() * 4;
+        const delay = Math.random() * 2;
+        return `<div class="video-particle" style="width:${size}px;height:${size}px;background:${color};left:${left}%;animation-duration:${dur}s;animation-delay:${delay}s;bottom:0"></div>`;
+      }).join('');
+
+      // Render characters
+      const chars = page.characters || [page.backgroundEmoji || '⭐'];
+      const charsHTML = chars.map((c, i) => `<span class="video-char ${i === 1 ? 'active' : ''}" style="animation-delay:${i*0.15}s">${c}</span>`).join('');
+
+      // Highlight words for fun interaction
+      const highlightedText = page.text.split(' ').map(w => `<span class="word-highlight">${w}</span>`).join(' ');
+
+      const html = `
+        <div class="story-page ${direction === 'next' ? 'page-turn-next' : 'page-turn-prev'}">
+          <div class="animated-video-panel">
+            <div class="video-bg-gradient"></div>
+            <div class="video-particles">${particlesHTML}</div>
+            <div class="video-bg-emoji">${page.backgroundEmoji || '🌟'}</div>
+            <div class="video-characters">${charsHTML}</div>
+          </div>
+          <div class="page-content">
+            <div class="page-number-badge">📄 Page ${currentPage + 1} of ${total}</div>
+            <p class="page-text-fancy">${highlightedText}</p>
+          </div>
+        </div>`;
+
+      document.getElementById('storyContainer').innerHTML = html;
+
+      // Animate characters in sequence
+      document.querySelectorAll('.video-char').forEach((el, i) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(40px) scale(0.5)';
+        setTimeout(() => {
+          el.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+          el.style.opacity = '1';
+          el.style.transform = '';
+          el.classList.add('char-enter');
+        }, i * 150);
+      });
+
+      SoundEngine.play('pageTurn');
+      saveProgress();
+    }
+
+    function changePage(dir) {
+      if (currentPage + dir >= story.pages.length) {
+        showCompletion(); return;
+      }
+      if (currentPage + dir < 0) return;
+      currentPage += dir;
+      renderPage(dir > 0 ? 'next' : 'prev');
+      // Sparkle on next
+      if (dir > 0) spawnStars(2);
+    }
+
+    function goToPage(idx) {
+      if (idx === currentPage) return;
+      const dir = idx > currentPage ? 'next' : 'prev';
+      currentPage = idx;
+      renderPage(dir);
+    }
+
+    function showCompletion() {
+      AmbientMusic.stop();
+      SoundEngine.play('completion');
+      launchConfetti();
+      document.getElementById('storyContainer').innerHTML = `
+        <div class="story-page">
+          <div class="completion-card">
+            <span class="completion-emoji">🎉</span>
+            <h2 class="completion-title">Story Complete!</h2>
+            <p style="color:var(--text-muted);font-size:1.1rem;margin-bottom:1.5rem">
+              You finished "<strong>${story.title}</strong>"<br>What an amazing reader you are! ⭐
+            </p>
+            ${story.moral ? `
+            <div style="background:rgba(255,217,61,0.12);border:1.5px solid rgba(255,217,61,0.35);
+              border-radius:16px;padding:1.2rem 1.5rem;margin-bottom:1.8rem;max-width:480px;margin-left:auto;margin-right:auto">
+              <div style="font-size:1.3rem;margin-bottom:0.4rem">🌟 Moral of the Story</div>
+              <p style="color:var(--text-light);font-size:1rem;line-height:1.6;margin:0;font-style:italic">
+                "${story.moral}"
+              </p>
+            </div>` : ''}
+            <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+              <button class="btn btn-primary btn-large" onclick="currentPage=0;renderPage('next')">Read Again 🔄</button>
+              <a href="library.html" class="btn btn-secondary btn-large">More Stories 📚</a>
+              ${isLoggedIn() ? `<a href="dashboard.html" class="btn btn-ghost btn-large">My Dashboard 📊</a>` : ''}
+            </div>
+          </div>
+        </div>`;
+      document.getElementById('readerNav').style.display = 'none';
+      saveProgress(true);
+      setTimeout(launchConfetti, 1500);
+    }
+
+    function launchConfetti() {
+      const container = document.getElementById('confettiContainer');
+      const colors = ['#FF6B9D','#4ECDC4','#FFD93D','#7B2FBE','#6BCB77','#FF8C42'];
+      for (let i = 0; i < 60; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDuration = (2 + Math.random() * 3) + 's';
+        piece.style.animationDelay = (Math.random() * 1.5) + 's';
+        piece.style.width = (8 + Math.random() * 10) + 'px';
+        piece.style.height = (8 + Math.random() * 16) + 'px';
+        piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        container.appendChild(piece);
+        setTimeout(() => piece.remove(), 6000);
+      }
+    }
+
+    function spawnStars(count = 3) {
+      const rain = document.getElementById('starsRain');
+      const emojis = ['⭐','✨','💫','🌟'];
+      for (let i = 0; i < count; i++) {
+        const s = document.createElement('div');
+        s.className = 'star-drop';
+        s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        s.style.left = (10 + Math.random() * 80) + '%';
+        s.style.animationDuration = (2 + Math.random() * 2) + 's';
+        s.style.animationDelay = (i * 0.2) + 's';
+        s.style.fontSize = (1 + Math.random()) + 'rem';
+        rain.appendChild(s);
+        setTimeout(() => s.remove(), 5000);
+      }
+    }
+
+    // Progress saving removed — simplified backend has no progress collection
+    function saveProgress(completed = false) {
+      // No-op: kept so existing callers don't break
+    }
+
+    async function toggleLike() {
+      SoundEngine.play('like');
+      spawnStars(3);
+      liked = !liked;
+      updateLikeBtn();
+      try { await API.post(`/stories/${storyId}/like`); } catch(e) {}
+    }
+
+    function updateLikeBtn() {
+      const btn = document.getElementById('likeBtn');
+      btn.className = `like-btn ${liked ? 'liked' : ''}`;
+      btn.textContent = liked ? '❤️ Liked!' : '🤍 Like';
+    }
+
+    function toggleSound() {
+      soundEnabled = SoundEngine.toggle();
+      document.getElementById('soundToggle').textContent = soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF';
+      if (soundEnabled) { AmbientMusic.start(); SoundEngine.play('click'); }
+      else AmbientMusic.stop();
+    }
+
+    function goBack() {
+      AmbientMusic.stop();
+      saveProgress();
+      window.location.href = 'library.html';
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changePage(1); }
+      if (e.key === 'ArrowLeft') changePage(-1);
+    });
+
+    checkAuth();
+    loadStory();
+  </script>
+</body>
+</html>
